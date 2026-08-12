@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Español — карточки</title>
+<style>
+  :root { --bg:#f5f5f5; --card:#fff; --text:#171717; --muted:#777; --border:#dedede; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); display:flex; align-items:center; justify-content:center; padding:22px; user-select:none; -webkit-user-select:none; }
+  .app { width:min(92vw,620px); }
+  .top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; color:var(--muted); font-size:14px; }
+  .shuffle { border:1px solid var(--border); background:#fff; border-radius:12px; padding:9px 12px; font-size:15px; cursor:pointer; }
+  .scene { perspective:1000px; }
+  .card { width:100%; height:min(55vh,360px); min-height:260px; position:relative; transform-style:preserve-3d; transition:transform .35s ease; cursor:pointer; touch-action:pan-y; }
+  .card.flipped { transform:rotateY(180deg); }
+  .face { position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden; background:var(--card); border:1px solid var(--border); border-radius:24px; box-shadow:0 12px 35px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; padding:36px; text-align:center; font-size:clamp(30px,6vw,52px); font-weight:700; line-height:1.15; }
+  .back { transform:rotateY(180deg); }
+  .hint { text-align:center; color:var(--muted); font-size:13px; margin-top:12px; }
+  .controls { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  .nav { height:58px; border:1px solid var(--border); background:#fff; border-radius:16px; font-size:26px; cursor:pointer; }
+  .nav:active,.shuffle:active { transform:scale(.98); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div id="counter"></div><button class="shuffle" id="shuffle">🔀 Shuffle</button></div>
+  <div class="scene"><div class="card" id="card" aria-label="Карточка"><div class="face front" id="ru"></div><div class="face back" id="es"></div></div></div>
+  <div class="hint">Нажми на карточку, чтобы перевернуть · свайпни для следующей</div>
+  <div class="controls"><button class="nav" id="prev">←</button><button class="nav" id="next">→</button></div>
+</div>
+<script>
+const original=[{"ru":"кричать","es":"gritar"},{"ru":"раздражать","es":"molestar"},{"ru":"озеро","es":"lago"},{"ru":"винодельня","es":"bodega"},{"ru":"по факту","es":"de hecho"},{"ru":"окружение","es":"el entorno"},{"ru":"создать","es":"crear"},{"ru":"закреплять / прикреплять","es":"fijar"},{"ru":"сдаваться","es":"rendirse"},{"ru":"пол","es":"el suelo"},{"ru":"куст","es":"un arbusto"},{"ru":"лес","es":"bosque"},{"ru":"что угодно","es":"lo que sea"},{"ru":"убить","es":"matar"},{"ru":"пересечься / столкнуться","es":"chocarse"}];
+let cards=[...original],index=0,flipped=false;
+const card=document.getElementById('card'),ru=document.getElementById('ru'),es=document.getElementById('es'),counter=document.getElementById('counter');
+function render(){flipped=false;card.classList.remove('flipped');ru.textContent=cards[index].ru;es.textContent=cards[index].es;counter.textContent=`${index+1} / ${cards.length}`;}
+function next(){index=(index+1)%cards.length;render();}
+function prev(){index=(index-1+cards.length)%cards.length;render();}
+function shuffle(){for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}index=0;render();}
+card.addEventListener('click',()=>{flipped=!flipped;card.classList.toggle('flipped',flipped);});
+document.getElementById('next').addEventListener('click',next);document.getElementById('prev').addEventListener('click',prev);document.getElementById('shuffle').addEventListener('click',shuffle);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();if(e.key===' '||e.key==='Enter'){e.preventDefault();flipped=!flipped;card.classList.toggle('flipped',flipped);}});
+let startX=0,startY=0;card.addEventListener('touchstart',e=>{const t=e.changedTouches[0];startX=t.clientX;startY=t.clientY;},{passive:true});
+card.addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-startX,dy=t.clientY-startY;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)){dx<0?next():prev();}},{passive:true});
+shuffle();
+</script>
+</body>
+</html>
